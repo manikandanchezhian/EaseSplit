@@ -1,0 +1,1448 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<title>Easesplit</title>
+<meta name="theme-color" content="#5B4FE9" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Easesplit" />
+<link rel="manifest" href="/manifest.json" />
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+<link rel="icon" href="/icons/icon-192.png" />
+<style>
+:root {
+  --bg: #F5F5FA;
+  --surface: #FFFFFF;
+  --surface-2: #FAFAFD;
+  --primary: #5B4FE9;
+  --primary-ink: #FFFFFF;
+  --primary-soft: #EEECFD;
+  --green: #16A34A;
+  --green-soft: #E9F9EF;
+  --red: #E1483F;
+  --red-soft: #FDECEB;
+  --amber: #D97706;
+  --amber-soft: #FEF3E0;
+  --text: #17171F;
+  --text-muted: #85859A;
+  --border: #ECECF3;
+  --radius-lg: 22px;
+  --radius-md: 16px;
+  --radius-sm: 11px;
+  --shadow: 0 1px 2px rgba(23,23,31,.04), 0 8px 24px rgba(23,23,31,.05);
+  --nav-h: 68px;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-t: env(safe-area-inset-top, 0px);
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  overscroll-behavior-y: contain;
+}
+button, input, select, textarea { font-family: inherit; }
+input, select, textarea {
+  width: 100%; padding: 13px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 15px; background: var(--surface-2); color: var(--text); outline: none;
+  transition: border-color .15s;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--primary); background: var(--surface); }
+label.field-label { font-size: 12.5px; font-weight: 600; color: var(--text-muted); display: block; margin: 14px 0 6px; text-transform: uppercase; letter-spacing: .03em; }
+label.field-label:first-child { margin-top: 0; }
+button { cursor: pointer; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  border: none; border-radius: var(--radius-sm); padding: 14px 18px; font-size: 15px; font-weight: 700;
+  width: 100%;
+}
+.btn-primary { background: var(--primary); color: var(--primary-ink); box-shadow: 0 6px 16px rgba(91,79,233,.28); }
+.btn-primary:active { transform: scale(.98); }
+.btn-primary:disabled { opacity: .5; box-shadow: none; }
+.btn-ghost { background: var(--surface-2); color: var(--text); border: 1.5px solid var(--border); }
+.btn-danger-outline { background: var(--red-soft); color: var(--red); }
+.btn-green-outline { background: var(--green-soft); color: var(--green); }
+.btn-sm { width: auto; padding: 9px 14px; font-size: 13.5px; border-radius: 10px; }
+.icon { width: 22px; height: 22px; flex-shrink: 0; }
+.icon-sm { width: 17px; height: 17px; }
+
+#app { min-height: 100%; padding-bottom: calc(var(--nav-h) + var(--safe-b) + 12px); }
+.screen { max-width: 480px; margin: 0 auto; padding: 0 16px; }
+.hidden { display: none !important; }
+
+/* ---------- Auth ---------- */
+.auth-wrap { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 24px; max-width: 420px; margin: 0 auto; }
+.brand { text-align: center; margin-bottom: 28px; }
+.brand-badge {
+  width: 68px; height: 68px; border-radius: 20px; background: linear-gradient(145deg, #6E62F0, #4B3DE0);
+  display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; box-shadow: 0 10px 24px rgba(91,79,233,.35);
+}
+.brand h1 { font-size: 24px; margin: 0 0 4px; }
+.brand p { color: var(--text-muted); margin: 0; font-size: 14px; }
+.auth-card { background: var(--surface); border-radius: var(--radius-lg); padding: 22px; box-shadow: var(--shadow); }
+.auth-tabs { display: flex; background: var(--surface-2); border-radius: 12px; padding: 4px; margin-bottom: 18px; }
+.auth-tabs button { flex: 1; padding: 10px; border: none; border-radius: 9px; background: none; font-weight: 700; font-size: 14px; color: var(--text-muted); }
+.auth-tabs button.active { background: var(--surface); color: var(--primary); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+.field-err { color: var(--red); font-size: 13px; margin-top: 8px; }
+.field-hint { color: var(--text-muted); font-size: 12.5px; margin-top: 6px; }
+
+/* ---------- Header ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 20; background: var(--bg);
+  padding: calc(14px + var(--safe-t)) 16px 10px;
+  display: flex; align-items: center; justify-content: space-between;
+  max-width: 480px; margin: 0 auto;
+}
+.topbar h2 { margin: 0; font-size: 21px; }
+.topbar .sub { color: var(--text-muted); font-size: 13px; margin-top: 1px; }
+.icon-btn {
+  width: 40px; height: 40px; border-radius: 12px; border: none; background: var(--surface);
+  display: flex; align-items: center; justify-content: center; position: relative; box-shadow: var(--shadow);
+}
+.badge-dot {
+  position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--red);
+  border: 2px solid var(--bg);
+}
+.header-actions { display: flex; gap: 8px; }
+
+/* ---------- Cards / stats ---------- */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 4px 0 18px; }
+.stat-card { background: var(--surface); border-radius: var(--radius-md); padding: 16px; box-shadow: var(--shadow); }
+.stat-card .stat-label { font-size: 12.5px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.stat-card .stat-value { font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+.stat-card.owe .stat-value { color: var(--red); }
+.stat-card.receive .stat-value { color: var(--green); }
+.stat-card.pressable:active { transform: scale(.97); }
+
+.section-head { display: flex; align-items: center; justify-content: space-between; margin: 22px 0 10px; }
+.section-head h3 { font-size: 15px; margin: 0; color: var(--text); }
+.section-head a.link { font-size: 13px; color: var(--primary); font-weight: 700; text-decoration: none; }
+
+.card { background: var(--surface); border-radius: var(--radius-md); box-shadow: var(--shadow); overflow: hidden; }
+.list-row {
+  display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-bottom: 1px solid var(--border);
+}
+.list-row:last-child { border-bottom: none; }
+.list-row.pressable:active { background: var(--surface-2); }
+.avatar {
+  width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 14px; color: #fff;
+}
+.avatar-sm { width: 30px; height: 30px; font-size: 12px; }
+.row-main { flex: 1; min-width: 0; }
+.row-title { font-size: 14.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row-sub { font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
+.row-amt { font-weight: 800; font-size: 15px; flex-shrink: 0; }
+.row-amt.pos { color: var(--green); }
+.row-amt.neg { color: var(--red); }
+.empty-state { padding: 30px 16px; text-align: center; color: var(--text-muted); font-size: 14px; }
+.empty-state .icon { width: 40px; height: 40px; margin: 0 auto 10px; opacity: .4; }
+.pill { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
+.pill-house { background: var(--primary-soft); color: var(--primary); }
+.pill-pending { background: var(--amber-soft); color: var(--amber); }
+.pill-accepted { background: var(--green-soft); color: var(--green); }
+.pill-rejected, .pill-disputed { background: var(--red-soft); color: var(--red); }
+.avatar-stack { display: flex; }
+.avatar-stack .avatar { margin-left: -10px; border: 2.5px solid var(--surface); }
+.avatar-stack .avatar:first-child { margin-left: 0; }
+
+/* ---------- Bottom nav ---------- */
+.bottom-nav-outer {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 30;
+  background: var(--surface); border-top: 1px solid var(--border);
+}
+.bottom-nav {
+  max-width: 480px; margin: 0 auto;
+  padding-bottom: var(--safe-b);
+  display: flex; align-items: center; justify-content: space-around; height: var(--nav-h);
+}
+.nav-item {
+  background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 3px;
+  color: var(--text-muted); font-size: 10.5px; font-weight: 700; padding: 6px 10px; flex: 1;
+}
+.nav-item.active { color: var(--primary); }
+.nav-icon-wrap { position: relative; }
+.nav-icon-wrap .badge-dot { top: -2px; right: -4px; border-color: var(--surface); }
+.nav-fab {
+  width: 54px; height: 54px; border-radius: 50%; background: var(--primary); color: #fff; border: none;
+  display: flex; align-items: center; justify-content: center; margin-top: -30px;
+  box-shadow: 0 8px 18px rgba(91,79,233,.4); flex: 0 0 auto;
+}
+.nav-fab:active { transform: scale(.94); }
+
+/* ---------- Sheets / modals ---------- */
+.sheet-backdrop {
+  position: fixed; inset: 0; background: rgba(17,17,26,.4); z-index: 50;
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.sheet {
+  background: var(--bg); width: 100%; max-width: 480px; max-height: 92vh; overflow-y: auto;
+  border-radius: 24px 24px 0 0; padding: 10px 16px calc(20px + var(--safe-b));
+  animation: sheet-up .22s ease-out;
+}
+@keyframes sheet-up { from { transform: translateY(24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.sheet-grip { width: 38px; height: 4px; background: var(--border); border-radius: 3px; margin: 6px auto 12px; }
+.sheet-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.sheet-header h3 { margin: 0; font-size: 18px; }
+.sheet-close { background: var(--surface-2); border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+.toast-wrap { position: fixed; top: calc(var(--safe-t) + 12px); left: 0; right: 0; z-index: 90; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
+.toast { background: #17171F; color: #fff; padding: 11px 18px; border-radius: 12px; font-size: 13.5px; font-weight: 600; box-shadow: 0 8px 20px rgba(0,0,0,.25); max-width: 90vw; }
+.toast.err { background: var(--red); }
+.toast.ok { background: var(--green); }
+
+.update-banner {
+  position: fixed; left: 12px; right: 12px; bottom: calc(var(--nav-h) + var(--safe-b) + 10px); z-index: 40;
+  background: var(--text); color: #fff; border-radius: var(--radius-sm); padding: 12px 14px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.25); max-width: 480px; margin: 0 auto;
+  animation: sheet-up .22s ease-out;
+}
+.update-banner span { font-size: 13.5px; font-weight: 600; }
+.update-banner button { background: var(--primary); color: #fff; border: none; border-radius: 9px; padding: 8px 14px; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+
+/* ---------- Split type toggle ---------- */
+.seg { display: flex; background: var(--surface-2); border-radius: 12px; padding: 4px; gap: 4px; }
+.seg button { flex: 1; border: none; background: none; padding: 10px; border-radius: 9px; font-weight: 700; font-size: 13.5px; color: var(--text-muted); }
+.seg button.active { background: var(--surface); color: var(--primary); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+
+.chip-input { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-2); min-height: 46px; align-items: center; }
+.chip { display: inline-flex; align-items: center; gap: 6px; background: var(--primary-soft); color: var(--primary); font-weight: 700; font-size: 12.5px; padding: 6px 10px 6px 6px; border-radius: 999px; }
+.chip .avatar-sm { width: 20px; height: 20px; font-size: 9px; }
+.chip button { background: none; border: none; color: var(--primary); font-size: 15px; line-height: 1; padding: 0; }
+.chip-input input { border: none; background: none; flex: 1; min-width: 90px; padding: 4px; }
+
+.participant-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; }
+.participant-row .row-main { display: flex; align-items: center; gap: 10px; flex: 1; }
+.participant-row input[type=number] { width: 90px; text-align: right; padding: 8px 10px; }
+.check-toggle { width: 24px; height: 24px; border-radius: 8px; border: 2px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: var(--surface); }
+.check-toggle.on { background: var(--primary); border-color: var(--primary); }
+.check-toggle.on svg { display: block; } .check-toggle svg { display: none; width: 15px; height: 15px; color: #fff; }
+
+.big-amount-input { font-size: 34px; font-weight: 800; text-align: center; border: none; background: none; padding: 8px; }
+.big-amount-input:focus { border: none; background: none; }
+
+.center-msg { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+.spinner { width: 26px; height: 26px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin .7s linear infinite; margin: 0 auto 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.invite-code-box { background: var(--primary-soft); border-radius: var(--radius-md); padding: 18px; text-align: center; margin-bottom: 16px; }
+.invite-code-box .code { font-size: 28px; font-weight: 800; letter-spacing: .12em; color: var(--primary); margin: 6px 0 12px; }
+.action-row { display: flex; gap: 8px; }
+.action-row .btn { width: auto; flex: 1; }
+
+.profile-header { display: flex; flex-direction: column; align-items: center; padding: 20px 0 8px; }
+.profile-header .avatar { width: 76px; height: 76px; font-size: 26px; margin-bottom: 10px; }
+.profile-header h2 { margin: 0; font-size: 19px; }
+.profile-header .sub { color: var(--text-muted); font-size: 13.5px; }
+.settings-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.settings-row:last-child { border-bottom: none; }
+.settings-row .label { font-size: 14.5px; font-weight: 600; }
+.settings-row .desc { font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
+.switch { width: 44px; height: 26px; border-radius: 999px; background: var(--border); position: relative; border: none; flex-shrink: 0; }
+.switch.on { background: var(--primary); }
+.switch .knob { width: 20px; height: 20px; border-radius: 50%; background: #fff; position: absolute; top: 3px; left: 3px; transition: left .15s; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+.switch.on .knob { left: 21px; }
+
+.split-detail-amount { text-align: center; padding: 8px 0 18px; }
+.split-detail-amount .amt { font-size: 36px; font-weight: 800; }
+.split-detail-amount .desc { color: var(--text-muted); font-size: 14.5px; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<div class="toast-wrap" id="toastWrap"></div>
+<div id="app"><div class="center-msg"><div class="spinner"></div>Loading Easesplit…</div></div>
+
+<!-- ============================= SVG ICON DEFS ============================= -->
+<svg width="0" height="0" style="position:absolute">
+<defs>
+<symbol id="ic-home" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1v-9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-house" viewBox="0 0 24 24"><path d="M3 21h18M5 21V9.5l7-5 7 5V21M9 21v-6h6v6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+<symbol id="ic-friends" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="17" cy="8" r="2.4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 14.2c2.6.4 4.5 2.7 4.5 5.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="ic-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="ic-bell" viewBox="0 0 24 24"><path d="M6 10a6 6 0 0 1 12 0c0 4 1.5 5.5 1.5 5.5h-15S6 14 6 10Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M10 18.5a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="ic-check" viewBox="0 0 24 24"><path d="M4 12.5 9.5 18 20 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+<symbol id="ic-chevron" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-back" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="ic-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="6" cy="12" r="2.4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="19" r="2.4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8.2 10.7 15.8 6.3M8.2 13.3l7.6 4.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="ic-pay" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 10.5h18" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 15h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="ic-logout" viewBox="0 0 24 24"><path d="M9 20H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 16l4-4-4-4M20 12H9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-empty" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8.5 14.5s1.2 2 3.5 2 3.5-2 3.5-2M9 9.5h.01M15 9.5h.01" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="ic-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3.5 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</defs>
+</svg>
+
+<script>
+'use strict';
+const API = location.origin + '/api';
+const S = {
+  token: localStorage.getItem('es_token') || null,
+  user: JSON.parse(localStorage.getItem('es_user') || 'null'),
+  route: 'home',
+  houses: [],
+  friends: [],
+  dashboard: null,
+  activeHouse: null,
+  activeSplit: null,
+  vapidKey: null,
+};
+
+// ---------------------------------------------------------------- helpers
+function money(n) { return '₹' + Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function initials(name) { return (name || '?').trim().split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase(); }
+const PALETTE = ['#5B4FE9', '#E1483F', '#16A34A', '#D97706', '#0EA5E9', '#DB2777', '#7C3AED', '#059669'];
+function colorFor(id) { return PALETTE[Math.abs(hashCode(String(id))) % PALETTE.length]; }
+function hashCode(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h << 5) - h + s.charCodeAt(i) | 0; return h; }
+function avatarHtml(nameOrUser, size) {
+  const name = typeof nameOrUser === 'object' ? nameOrUser.name : nameOrUser;
+  const id = typeof nameOrUser === 'object' ? nameOrUser.id : nameOrUser;
+  const cls = size === 'sm' ? 'avatar avatar-sm' : 'avatar';
+  return `<div class="${cls}" style="background:${colorFor(id)}">${initials(name)}</div>`;
+}
+function esc(s) { const d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+function timeAgo(iso) {
+  const d = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (d < 60) return 'just now';
+  if (d < 3600) return Math.floor(d / 60) + 'm ago';
+  if (d < 86400) return Math.floor(d / 3600) + 'h ago';
+  return Math.floor(d / 86400) + 'd ago';
+}
+function toast(msg, type) {
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = 'toast' + (type ? ' ' + type : '');
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+
+async function api(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+  if (S.token) headers['Authorization'] = 'Bearer ' + S.token;
+  const res = await fetch(API + path, { ...opts, headers: { ...headers, ...(opts.headers || {}) } });
+  let data = {};
+  try { data = await res.json(); } catch (e) {}
+  if (res.status === 401) { logout(true); throw new Error('Session expired — please log in again.'); }
+  if (!res.ok) {
+    const msg = data.message || (data.errors && Object.values(data.errors)[0][0]) || 'Something went wrong.';
+    throw new Error(msg);
+  }
+  return data;
+}
+
+function saveSession() {
+  localStorage.setItem('es_token', S.token || '');
+  localStorage.setItem('es_user', JSON.stringify(S.user));
+}
+function logout(silent) {
+  S.token = null; S.user = null; saveSession();
+  stopLiveSync();
+  cachesWarmed = false;
+  S.houses = []; S.friends = []; S._housesEverLoaded = false; S._friendsEverLoaded = false;
+  if (!silent) toast('Logged out');
+  renderRoot();
+}
+
+// ---------------------------------------------------------------- router / mount
+function go(route, param) {
+  S.route = route;
+  S.routeParam = param;
+  renderRoot();
+  window.scrollTo(0, 0);
+}
+function closeSheet() {
+  document.getElementById('sheetLayer')?.remove();
+}
+function openSheet(html, onMount) {
+  closeSheet();
+  const layer = document.createElement('div');
+  layer.id = 'sheetLayer';
+  layer.className = 'sheet-backdrop';
+  layer.innerHTML = `<div class="sheet">${html}</div>`;
+  layer.addEventListener('click', (e) => { if (e.target === layer) closeSheet(); });
+  document.body.appendChild(layer);
+  if (onMount) onMount(layer);
+}
+
+async function renderRoot() {
+  const app = document.getElementById('app');
+  if (!S.token) { app.innerHTML = authView(); mountAuth(); return; }
+  app.innerHTML = shellView();
+  mountShell();
+  await loadRouteData();
+  renderRouteBody();
+}
+
+// ---------------------------------------------------------------- AUTH
+let authTab = 'login';
+function authView() {
+  return `
+  <div class="auth-wrap">
+    <div class="brand">
+      <div class="brand-badge"><svg class="icon" style="width:32px;height:32px;color:#fff"><use href="#ic-house"/></svg></div>
+      <h1>Easesplit</h1>
+      <p>Split bills with your housemates, sorted automatically.</p>
+    </div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button id="tabLogin" class="${authTab === 'login' ? 'active' : ''}">Log in</button>
+        <button id="tabRegister" class="${authTab === 'register' ? 'active' : ''}">Sign up</button>
+      </div>
+      <div id="authForm"></div>
+    </div>
+  </div>`;
+}
+function mountAuth() {
+  document.getElementById('tabLogin').onclick = () => { authTab = 'login'; renderRoot(); };
+  document.getElementById('tabRegister').onclick = () => { authTab = 'register'; renderRoot(); };
+  const box = document.getElementById('authForm');
+  if (authTab === 'register') {
+    box.innerHTML = `
+      <label class="field-label">Your name</label>
+      <input id="rName" placeholder="Ram Kumar" autocomplete="name" />
+      <label class="field-label">Username</label>
+      <input id="rUsername" placeholder="ram_k" autocomplete="username" />
+      <div class="field-hint">Letters, numbers, underscores. This is how housemates find you.</div>
+      <label class="field-label">Password</label>
+      <input id="rPass" type="password" placeholder="At least 8 characters" autocomplete="new-password" />
+      <label class="field-label">Confirm password</label>
+      <input id="rPass2" type="password" autocomplete="new-password" />
+      <div id="authErr" class="field-err hidden"></div>
+      <div style="margin-top:18px"><button class="btn btn-primary" id="doRegister">Create account</button></div>`;
+    document.getElementById('doRegister').onclick = () => submitRegister();
+    box.querySelectorAll('input').forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') submitRegister(); }));
+  } else {
+    box.innerHTML = `
+      <label class="field-label">Username</label>
+      <input id="lUsername" placeholder="ram_k" autocomplete="username" />
+      <label class="field-label">Password</label>
+      <input id="lPass" type="password" placeholder="Password" autocomplete="current-password" />
+      <div id="authErr" class="field-err hidden"></div>
+      <div style="margin-top:18px"><button class="btn btn-primary" id="doLogin">Log in</button></div>`;
+    document.getElementById('doLogin').onclick = () => submitLogin();
+    box.querySelectorAll('input').forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') submitLogin(); }));
+  }
+}
+function showAuthErr(msg) {
+  const el = document.getElementById('authErr');
+  el.textContent = msg; el.classList.remove('hidden');
+}
+async function submitRegister() {
+  try {
+    const r = await api('/auth/register', { method: 'POST', body: JSON.stringify({
+      name: document.getElementById('rName').value.trim(),
+      username: document.getElementById('rUsername').value.trim(),
+      password: document.getElementById('rPass').value,
+      password_confirmation: document.getElementById('rPass2').value,
+    })});
+    S.token = r.token; S.user = r.user; saveSession();
+    toast(`Welcome, ${r.user.name.split(' ')[0]}!`, 'ok');
+    renderRoot();
+  } catch (e) { showAuthErr(e.message); }
+}
+async function submitLogin() {
+  try {
+    const r = await api('/auth/login', { method: 'POST', body: JSON.stringify({
+      username: document.getElementById('lUsername').value.trim(),
+      password: document.getElementById('lPass').value,
+    })});
+    S.token = r.token; S.user = r.user; saveSession();
+    renderRoot();
+  } catch (e) { showAuthErr(e.message); }
+}
+
+// ---------------------------------------------------------------- SHELL (post-login)
+function shellView() {
+  return `
+    <div class="topbar">
+      <div>
+        <h2 id="topTitle">Home</h2>
+        <div class="sub" id="topSub"></div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="btnBell"><svg class="icon"><use href="#ic-bell"/></svg><span id="bellDot" class="badge-dot hidden"></span></button>
+      </div>
+    </div>
+    <div class="screen" id="routeBody"><div class="center-msg"><div class="spinner"></div></div></div>
+    <div class="bottom-nav-outer"><nav class="bottom-nav">
+      <button class="nav-item" data-nav="home"><svg class="icon"><use href="#ic-home"/></svg>Home</button>
+      <button class="nav-item" data-nav="houses"><svg class="icon"><use href="#ic-house"/></svg>Houses</button>
+      <button class="nav-fab" id="btnFab"><svg class="icon" style="width:26px;height:26px"><use href="#ic-plus"/></svg></button>
+      <button class="nav-item" data-nav="friends"><span class="nav-icon-wrap"><svg class="icon"><use href="#ic-friends"/></svg><span id="friendsNavDot" class="badge-dot hidden"></span></span>Friends</button>
+      <button class="nav-item" data-nav="profile"><svg class="icon"><use href="#ic-user"/></svg>Profile</button>
+    </nav></div>`;
+}
+function mountShell() {
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.nav === S.route);
+    btn.onclick = () => go(btn.dataset.nav);
+  });
+  document.getElementById('btnFab').onclick = () => openCreateSplitSheet();
+  document.getElementById('btnBell').onclick = () => openNotificationsSheet();
+  refreshBadges();
+  startLiveSync();
+  warmHouseAndFriendCaches();
+}
+/**
+ * Fetches houses + friends once in the background so the "New split"
+ * sheet almost never has to block on network to show its pickers -- see
+ * openCreateSplitSheet(). Guarded to run once per page load; liveSyncTick
+ * keeps S.houses/S.friends fresh from then on for whichever screen is open.
+ */
+let cachesWarmed = false;
+async function warmHouseAndFriendCaches() {
+  if (cachesWarmed) return;
+  cachesWarmed = true;
+  try {
+    const [housesRes, friendsRes] = await Promise.all([api('/groups'), api('/friends')]);
+    S.houses = housesRes.groups; S._housesEverLoaded = true;
+    S.friends = friendsRes.friends; S._friendsEverLoaded = true;
+  } catch (e) { cachesWarmed = false; }
+}
+async function refreshBadges() {
+  try {
+    const [notif, pending] = await Promise.all([api('/notifications'), api('/friends/pending')]);
+    document.getElementById('bellDot')?.classList.toggle('hidden', !notif.unread_count);
+    document.getElementById('friendsNavDot')?.classList.toggle('hidden', !pending.pending_requests.length);
+  } catch (e) {}
+}
+
+/**
+ * Re-fetches whatever data the currently active screen shows and
+ * re-renders it -- the one function anything that might have changed a
+ * balance, a house, or a friend list should call afterward.
+ */
+async function refreshCurrentRoute() {
+  try {
+    if (S.route === 'home') { await syncHome(); return; }
+    if (S.route === 'houses') { const r = await api('/groups'); S.houses = r.groups; renderRouteBody(); return; }
+    if (S.route === 'house-detail') {
+      S.activeHouse = (await api(`/groups/${S.activeHouse.id}`)).group;
+      S.activeHouseLedger = await api(`/groups/${S.activeHouse.id}/ledger`);
+      renderRouteBody();
+      return;
+    }
+    if (S.route === 'friends') {
+      const [f, p] = await Promise.all([api('/friends'), api('/friends/pending')]);
+      S.friends = f.friends;
+      S.friendRequests = p.pending_requests;
+      renderRouteBody();
+      return;
+    }
+  } catch (e) {}
+}
+
+/**
+ * Keeps the app feeling live without a WebSocket server to run and manage:
+ * polls badges + whatever screen is open every 15s, and refreshes
+ * immediately the moment the app regains focus (e.g. a housemate switches
+ * back after a push notification) so numbers are never more than a
+ * glance's-worth of a moment stale.
+ */
+let liveSyncTimer = null;
+function startLiveSync() {
+  if (liveSyncTimer) return;
+  liveSyncTimer = setInterval(liveSyncTick, 15000);
+  document.addEventListener('visibilitychange', onVisibilityChange);
+  window.addEventListener('focus', liveSyncTick);
+}
+function stopLiveSync() {
+  clearInterval(liveSyncTimer);
+  liveSyncTimer = null;
+  document.removeEventListener('visibilitychange', onVisibilityChange);
+  window.removeEventListener('focus', liveSyncTick);
+}
+function onVisibilityChange() {
+  if (document.visibilityState === 'visible') liveSyncTick();
+}
+// Debounced: 'visibilitychange' and 'focus' can both fire for the same
+// moment (and some browsers/automation fire either more often than a
+// human interaction would suggest), so without a floor this can hammer
+// the API in a burst instead of a single, deliberate refresh.
+let lastSyncAt = 0;
+const MIN_SYNC_GAP_MS = 4000;
+function liveSyncTick() {
+  if (!S.token) return;
+  const now = Date.now();
+  if (now - lastSyncAt < MIN_SYNC_GAP_MS) return;
+  lastSyncAt = now;
+  refreshBadges();
+  refreshCurrentRoute();
+}
+
+async function loadRouteData() {
+  try {
+    if (S.route === 'home') {
+      S.dashboard = await api('/dashboard');
+    } else if (S.route === 'houses') {
+      const r = await api('/groups'); S.houses = r.groups;
+    } else if (S.route === 'house-detail') {
+      S.activeHouse = (await api(`/groups/${S.routeParam}`)).group;
+      S.activeHouseLedger = await api(`/groups/${S.routeParam}/ledger`);
+    } else if (S.route === 'friends') {
+      const r = await api('/friends'); S.friends = r.friends;
+      const p = await api('/friends/pending'); S.friendRequests = p.pending_requests;
+    } else if (S.route === 'profile') {
+      // nothing extra to load
+    }
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+function renderRouteBody() {
+  const body = document.getElementById('routeBody');
+  const titleEl = document.getElementById('topTitle');
+  const subEl = document.getElementById('topSub');
+  if (S.route === 'home') {
+    titleEl.textContent = `Hi, ${S.user.name.split(' ')[0]} 👋`;
+    subEl.textContent = 'Here’s where things stand';
+    body.innerHTML = homeView();
+    mountHome();
+  } else if (S.route === 'houses') {
+    titleEl.textContent = 'Your houses'; subEl.textContent = `${S.houses.length} house${S.houses.length === 1 ? '' : 's'}`;
+    body.innerHTML = housesView(); mountHouses();
+  } else if (S.route === 'house-detail') {
+    titleEl.textContent = S.activeHouse.name; subEl.textContent = `${S.activeHouse.users.length} members · invite ${S.activeHouse.invite_code}`;
+    body.innerHTML = houseDetailView(); mountHouseDetail();
+  } else if (S.route === 'friends') {
+    titleEl.textContent = 'Friends'; subEl.textContent = `${S.friends.length} friend${S.friends.length === 1 ? '' : 's'}`;
+    body.innerHTML = friendsView(); mountFriends();
+  } else if (S.route === 'profile') {
+    titleEl.textContent = 'Profile'; subEl.textContent = '@' + S.user.username;
+    body.innerHTML = profileView(); mountProfile();
+  }
+}
+
+// ---------------------------------------------------------------- HOME
+function homeView() {
+  const d = S.dashboard;
+  const cards = d ? d.cards : { you_owe: 0, you_will_receive: 0, pending_settlements: 0, active_groups: 0 };
+  return `
+    <div class="stats-grid">
+      <div class="stat-card owe pressable" data-open-detail="owe"><div class="stat-label">You Owe</div><div class="stat-value">${money(cards.you_owe)}</div></div>
+      <div class="stat-card receive pressable" data-open-detail="receive"><div class="stat-label">You Will Receive</div><div class="stat-value">${money(cards.you_will_receive)}</div></div>
+      <div class="stat-card"><div class="stat-label">Pending Settlements</div><div class="stat-value">${cards.pending_settlements}</div></div>
+      <div class="stat-card"><div class="stat-label">Active Houses</div><div class="stat-value">${cards.active_groups}</div></div>
+    </div>
+
+    ${pendingSplitsBlock()}
+    ${incomingSettlementsBlock()}
+
+    <div class="section-head"><h3>People who owe you</h3></div>
+    <div class="card">${peopleList(d?.people_who_owe_you, 'pos')}</div>
+
+    <div class="section-head"><h3>People you owe</h3></div>
+    <div class="card">${peopleList(d?.people_you_owe, 'neg', true)}</div>
+
+    <div class="section-head"><h3>Recent activity</h3></div>
+    <div class="card">${activityList(d?.recent_activity)}</div>
+  `;
+}
+function pendingSplitsBlock() {
+  if (!S._pendingSplits) return '';
+  const list = S._pendingSplits;
+  if (!list.length) return '';
+  return `
+    <div class="section-head"><h3>Splits awaiting your response</h3></div>
+    <div class="card">${list.map(e => {
+      const mine = (e.participants || []).find(p => p.user_id === S.user.id);
+      return `
+      <div class="list-row pressable" data-open-split="${e.id}">
+        ${avatarHtml(e.payer)}
+        <div class="row-main"><div class="row-title">${esc(e.description)}</div><div class="row-sub">${esc(e.payer.name)} paid ${money(e.amount)} · your share ${money(mine?.share_amount)}</div></div>
+        <button class="btn btn-danger-outline btn-sm" data-quick-reject="${e.id}">Reject</button>
+        <button class="btn btn-primary btn-sm" data-quick-accept="${e.id}">Accept</button>
+      </div>`;
+    }).join('')}</div>`;
+}
+function peopleList(list, sign, payable) {
+  if (!list || !list.length) return `<div class="empty-state"><svg class="icon"><use href="#ic-empty"/></svg><div>Nothing here yet.</div></div>`;
+  return list.map(p => `
+    <div class="list-row">
+      ${avatarHtml(p.user)}
+      <div class="row-main"><div class="row-title">${esc(p.user.name)}</div><div class="row-sub">@${esc(p.user.username)}</div></div>
+      <div class="row-amt ${sign}">${money(p.amount)}</div>
+      ${payable ? `<button class="btn btn-primary btn-sm" data-pay-user="${p.user.id}" data-pay-amt="${p.amount}" data-pay-name="${esc(p.user.name)}">Pay</button>` : ''}
+    </div>`).join('');
+}
+function activityList(list) {
+  if (!list || !list.length) return `<div class="empty-state">No activity yet.</div>`;
+  return list.slice(0, 10).map(a => `
+    <div class="list-row">
+      <svg class="icon icon-sm" style="color:var(--text-muted)"><use href="#ic-clock"/></svg>
+      <div class="row-main"><div class="row-title">${esc(a.description)}</div><div class="row-sub">${timeAgo(a.created_at)}</div></div>
+    </div>`).join('');
+}
+function incomingSettlementsBlock() {
+  if (!S._incomingSettlements) return '';
+  const list = S._incomingSettlements;
+  if (!list.length) return '';
+  return `
+    <div class="section-head"><h3>Confirm payments received</h3></div>
+    <div class="card">${list.map(s => `
+      <div class="list-row">
+        ${avatarHtml(s.from_user)}
+        <div class="row-main"><div class="row-title">${esc(s.from_user.name)} says they paid ${money(s.amount)}</div><div class="row-sub">${timeAgo(s.initiated_at || s.created_at)}</div></div>
+        <button class="btn btn-green-outline btn-sm" data-confirm-settlement="${s.id}">Confirm</button>
+      </div>`).join('')}</div>`;
+}
+/**
+ * Refreshes everything Home shows: the dashboard cards, settlements
+ * waiting on your confirmation, and splits waiting on your accept/reject --
+ * then re-renders Home if that's still the active screen. This is the one
+ * function anything that might move a balance should call afterward.
+ */
+async function syncHome() {
+  try {
+    const [dash, settlementsRes, expensesRes] = await Promise.all([api('/dashboard'), api('/settlements'), api('/expenses')]);
+    S.dashboard = dash;
+    S._incomingSettlements = settlementsRes.settlements.data.filter(s => s.to_user_id === S.user.id && s.status === 'initiated');
+    S._pendingSplits = expensesRes.expenses.data.filter(e => {
+      const mine = (e.participants || []).find(p => p.user_id === S.user.id);
+      return mine && mine.status === 'pending';
+    });
+    const block = document.querySelector('#routeBody');
+    if (block && S.route === 'home') { block.innerHTML = homeView(); mountHome(false); }
+  } catch (e) {}
+}
+function mountHome(loadExtras = true) {
+  document.querySelectorAll('[data-pay-user]').forEach(btn => {
+    btn.onclick = () => openPaySheet(btn.dataset.payUser, btn.dataset.payAmt, btn.dataset.payName);
+  });
+  document.querySelectorAll('[data-confirm-settlement]').forEach(btn => {
+    btn.onclick = () => confirmSettlement(btn.dataset.confirmSettlement);
+  });
+  document.querySelectorAll('[data-quick-accept]').forEach(btn => {
+    btn.onclick = (ev) => { ev.stopPropagation(); respondSplit(btn.dataset.quickAccept, 'accept'); };
+  });
+  document.querySelectorAll('[data-quick-reject]').forEach(btn => {
+    btn.onclick = (ev) => { ev.stopPropagation(); respondSplit(btn.dataset.quickReject, 'reject'); };
+  });
+  document.querySelectorAll('[data-open-split]').forEach(row => {
+    row.onclick = async () => {
+      try {
+        const r = await api(`/expenses/${row.dataset.openSplit}`);
+        openSplitDetailSheet(r.expense);
+      } catch (e) { toast(e.message, 'err'); }
+    };
+  });
+  document.querySelectorAll('[data-open-detail]').forEach(card => {
+    card.onclick = () => openBalanceDetailSheet(card.dataset.openDetail);
+  });
+  if (loadExtras) syncHome();
+}
+function openBalanceDetailSheet(type) {
+  const owe = type === 'owe';
+  const list = (owe ? S.dashboard?.people_you_owe : S.dashboard?.people_who_owe_you) || [];
+  const total = owe ? S.dashboard?.cards.you_owe : S.dashboard?.cards.you_will_receive;
+
+  openSheet(`
+    <div class="sheet-grip"></div>
+    <div class="sheet-header"><h3>${owe ? 'You owe' : 'You will receive'}</h3><button class="sheet-close" onclick="closeSheet()"><svg class="icon icon-sm"><use href="#ic-x"/></svg></button></div>
+    <div style="text-align:center;padding:6px 0 18px">
+      <div style="font-size:34px;font-weight:800;color:${owe ? 'var(--red)' : 'var(--green)'}">${money(total)}</div>
+      <div style="color:var(--text-muted);font-size:13.5px;margin-top:4px">${owe ? `across ${list.length} person${list.length === 1 ? '' : 's'}` : `owed by ${list.length} person${list.length === 1 ? '' : 's'}`}</div>
+    </div>
+    <div class="card">${peopleList(list, owe ? 'neg' : 'pos', owe)}</div>
+  `, () => {
+    document.querySelectorAll('[data-pay-user]').forEach(btn => {
+      btn.onclick = () => openPaySheet(btn.dataset.payUser, btn.dataset.payAmt, btn.dataset.payName);
+    });
+  });
+}
+async function confirmSettlement(id) {
+  try {
+    await api(`/settlements/${id}/verify`, { method: 'POST', body: JSON.stringify({ status: 'verified', method: 'upi_collect', provider: 'manual-confirm' }) });
+    toast('Payment confirmed — balances updated', 'ok');
+    await syncHome();
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+// ---------------------------------------------------------------- PAY SHEET
+function openPaySheet(userId, amount, name) {
+  openSheet(`
+    <div class="sheet-grip"></div>
+    <div class="sheet-header"><h3>Pay ${esc(name)}</h3><button class="sheet-close" onclick="closeSheet()"><svg class="icon icon-sm"><use href="#ic-x"/></svg></button></div>
+    <div style="text-align:center;padding:10px 0 20px">
+      <div style="font-size:38px;font-weight:800">${money(amount)}</div>
+      <div style="color:var(--text-muted);font-size:13.5px;margin-top:4px">via any UPI app</div>
+    </div>
+    <button class="btn btn-primary" id="btnDoPay"><svg class="icon icon-sm"><use href="#ic-pay"/></svg>Open UPI app</button>
+    <div class="field-hint" style="text-align:center;margin-top:14px">After paying, ${esc(name)} will confirm receipt in their app — that's when your balance updates.</div>
+  `, () => {
+    document.getElementById('btnDoPay').onclick = async () => {
+      try {
+        const r = await api('/settlements', { method: 'POST', body: JSON.stringify({ to_user_id: Number(userId), amount: Number(amount), method: 'upi' }) });
+        closeSheet();
+        if (r.upi_deep_link) {
+          toast('Opening your UPI app…');
+          window.location.href = r.upi_deep_link;
+        } else {
+          toast(`${name} hasn't added a UPI ID yet — pay them another way, they can confirm it here.`, 'err');
+        }
+        await refreshCurrentRoute();
+      } catch (e) { toast(e.message, 'err'); }
+    };
+  });
+}
+
+// ---------------------------------------------------------------- HOUSES
+function housesView() {
+  if (!S.houses.length) {
+    return `<div class="empty-state" style="padding:50px 16px">
+      <svg class="icon" style="width:44px;height:44px"><use href="#ic-house"/></svg>
+      <div style="margin:10px 0 18px">No houses yet. Create one or join with an invite code.</div>
+      <div class="action-row">
+        <button class="btn btn-primary" id="btnCreateHouseEmpty">Create house</button>
+        <button class="btn btn-ghost" id="btnJoinHouseEmpty">Join house</button>
+      </div>
+    </div>`;
+  }
+  return `
+    <div class="action-row" style="margin-bottom:16px">
+      <button class="btn btn-primary" id="btnCreateHouse">+ Create house</button>
+      <button class="btn btn-ghost" id="btnJoinHouse">Join house</button>
+    </div>
+    <div class="card">
+      ${S.houses.map(h => `
+        <div class="list-row pressable" data-house="${h.id}">
+          <div class="avatar" style="background:${colorFor(h.id)}"><svg class="icon icon-sm" style="color:#fff"><use href="#ic-house"/></svg></div>
+          <div class="row-main"><div class="row-title">${esc(h.name)}</div><div class="row-sub"><span class="pill pill-house">${esc(h.type)}</span></div></div>
+          <svg class="icon icon-sm" style="color:var(--text-muted)"><use href="#ic-chevron"/></svg>
+        </div>`).join('')}
+    </div>`;
+}
+function mountHouses() {
+  ['btnCreateHouse', 'btnCreateHouseEmpty'].forEach(id => { const el = document.getElementById(id); if (el) el.onclick = openCreateHouseSheet; });
+  ['btnJoinHouse', 'btnJoinHouseEmpty'].forEach(id => { const el = document.getElementById(id); if (el) el.onclick = openJoinHouseSheet; });
+  document.querySelectorAll('[data-house]').forEach(row => row.onclick = () => go('house-detail', row.dataset.house));
+}
+
+function openCreateHouseSheet() {
+  let usernames = [];
+  openSheet(`
+    <div class="sheet-grip"></div>
+    <div class="sheet-header"><h3>Create a house</h3><button class="sheet-close" onclick="closeSheet()"><svg class="icon icon-sm"><use href="#ic-x"/></svg></button></div>
+    <label class="field-label">House name</label>
+    <input id="hName" placeholder="e.g. 42 Baker Street" />
+    <label class="field-label">Add housemates (optional, by username)</label>
+    <div class="chip-input" id="chipBox"><input id="hUsername" placeholder="Type a username, press Enter" /></div>
+    <div class="field-hint">They'll appear immediately if registered — or share the invite code afterward.</div>
+    <div id="createHouseErr" class="field-err hidden"></div>
+    <div style="margin-top:18px"><button class="btn btn-primary" id="btnSubmitHouse">Create house</button></div>
+  `, () => {
+    const input = document.getElementById('hUsername');
+    function renderChips() {
+      document.querySelectorAll('#chipBox .chip').forEach(c => c.remove());
+      usernames.forEach((u, i) => {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.innerHTML = `@${esc(u)} <button data-i="${i}">&times;</button>`;
+        chip.querySelector('button').onclick = () => { usernames.splice(i, 1); renderChips(); };
+        input.before(chip);
+      });
+    }
+    const commitChip = wireChipInput(input, usernames, renderChips);
+    document.getElementById('btnSubmitHouse').onclick = async () => {
+      commitChip();
+      const name = document.getElementById('hName').value.trim();
+      if (!name) { showSheetErr('createHouseErr', 'Give your house a name.'); return; }
+      try {
+        const r = await api('/groups', { method: 'POST', body: JSON.stringify({ name, type: 'house', usernames }) });
+        closeSheet();
+        toast(`"${r.group.name}" created!`, 'ok');
+        if (r.not_found_usernames?.length) toast(`Not found: ${r.not_found_usernames.join(', ')}`, 'err');
+        const gr = await api('/groups'); S.houses = gr.groups;
+        go('house-detail', r.group.id);
+      } catch (e) { showSheetErr('createHouseErr', e.message); }
+    };
+  });
+}
+function openJoinHouseSheet() {
+  openSheet(`
+    <div class="sheet-grip"></div>
+    <div class="sheet-header"><h3>Join a house</h3><button class="sheet-close" onclick="closeSheet()"><svg class="icon icon-sm"><use href="#ic-x"/></svg></button></div>
+    <label class="field-label">Invite code</label>
+    <input id="joinCode" placeholder="e.g. XJ92KLP1" style="text-transform:uppercase;letter-spacing:.08em;font-weight:700;text-align:center" />
+    <div id="joinErr" class="field-err hidden"></div>
+    <div style="margin-top:18px"><button class="btn btn-primary" id="btnSubmitJoin">Join house</button></div>
+  `, () => {
+    document.getElementById('btnSubmitJoin').onclick = async () => {
+      const invite_code = document.getElementById('joinCode').value.trim();
+      try {
+        const r = await api('/groups/join', { method: 'POST', body: JSON.stringify({ invite_code }) });
+        closeSheet();
+        toast(`Joined "${r.group.name}"!`, 'ok');
+        const gr = await api('/groups'); S.houses = gr.groups;
+        go('house-detail', r.group.id);
+      } catch (e) { showSheetErr('joinErr', e.message); }
+    };
+  });
+}
+function showSheetErr(id, msg) { const el = document.getElementById(id); if (el) { el.textContent = msg; el.classList.remove('hidden'); } }
+
+/**
+ * Wires a chip-style username input: Enter/comma commits a chip, and so
+ * does losing focus or submitting with leftover text -- mobile virtual
+ * keyboards don't always fire a reliable keydown for their "Enter"/"Go" key.
+ */
+function wireChipInput(input, usernames, renderChips) {
+  function commit() {
+    const v = input.value.trim().replace(/^@/, '');
+    if (v) { usernames.push(v); input.value = ''; renderChips(); }
+  }
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); commit(); }
+  });
+  input.addEventListener('blur', commit);
+  return commit;
+}
+
+// ---------------------------------------------------------------- HOUSE DETAIL
+function houseDetailView() {
+  const h = S.activeHouse;
+  const led = S.activeHouseLedger;
+  const expenses = (led?.expenses || []);
+  return `
+    <button class="btn btn-ghost btn-sm" style="margin-bottom:14px" id="btnBackHouses"><svg class="icon icon-sm"><use href="#ic-back"/></svg>All houses</button>
+    <div class="invite-code-box">
+      <div style="font-size:12.5px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.05em">Invite code</div>
+      <div class="code">${esc(h.invite_code)}</div>
+      <div class="action-row">
+        <button class="btn btn-ghost btn-sm" id="btnCopyInvite"><svg class="icon icon-sm"><use href="#ic-copy"/></svg>Copy</button>
+        <button class="btn btn-ghost btn-sm" id="btnShareInvite"><svg class="icon icon-sm"><use href="#ic-share"/></svg>Share</button>
+      </div>
+    </div>
+    <div class="section-head"><h3>Members (${h.users.length})</h3><a class="link" id="btnAddMembers">+ Add</a></div>
+    <div class="card">${h.users.map(u => `
+      <div class="list-row">${avatarHtml(u)}<div class="row-main"><div class="row-title">${esc(u.name)}</div><div class="row-sub">@${esc(u.username)}${u.pivot?.role === 'admin' ? ' · admin' : ''}</div></div></div>`).join('')}
+    </div>
+    <div class="section-head"><h3>Expenses</h3></div>
+    <div class="card">
+      ${expenses.length ? expenses.map(e => splitRowHtml(e)).join('') : `<div class="empty-state">No splits in this house yet.</div>`}
+    </div>
+  `;
+}
+function splitRowHtml(e) {
+  const mine = (e.participants || []).find(p => p.user_id === S.user.id);
+  const statusPill = mine ? `<span class="pill pill-${mine.status}">${mine.status}</span>` : '';
+  return `
+    <div class="list-row pressable" data-split="${e.id}">
+      ${avatarHtml(e.payer)}
+      <div class="row-main"><div class="row-title">${esc(e.description)}</div><div class="row-sub">${esc(e.payer.name)} paid · ${statusPill}</div></div>
+      <div class="row-amt">${money(e.amount)}</div>
+    </div>`;
+}
+function mountHouseDetail() {
+  document.getElementById('btnBackHouses').onclick = () => go('houses');
+  document.getElementById('btnCopyInvite').onclick = () => { navigator.clipboard?.writeText(S.activeHouse.invite_code); toast('Invite code copied'); };
+  document.getElementById('btnShareInvite').onclick = async () => {
+    const text = `Join our house "${S.activeHouse.name}" on Easesplit! Invite code: ${S.activeHouse.invite_code}`;
+    if (navigator.share) { try { await navigator.share({ text }); } catch (e) {} }
+    else { navigator.clipboard?.writeText(text); toast('Invite text copied'); }
+  };
+  document.getElementById('btnAddMembers').onclick = () => openAddMembersSheet();
+  document.querySelectorAll('[data-split]').forEach(row => {
+    const exp = S.activeHouseLedger.expenses.find(e => e.id == row.dataset.split);
+    row.onclick = () => openSplitDetailSheet(exp);
+  });
+}
+function openAddMembersSheet() {
+  let usernames = [];
+  openSheet(`
+    <div class="sheet-grip"></div>
+    <div class="sheet-header"><h3>Add housemates</h3><button class="sheet-close" onclick="closeSheet()"><svg class="icon icon-sm"><use href="#ic-x"/></svg></button></div>
+    <label class="field-label">Usernames</label>
+    <div class="chip-input" id="chipBox2"><input id="amUsername" placeholder="Type a username, press Enter" /></div>
+    <div id="addMemErr" class="field-err hidden"></div>
+    <div style="margin-top:18px"><button class="btn btn-primary" id="btnSubmitAddMem">Add to house</button></div>
+  `, () => {
+    const input = document.getElementById('amUsername');
+    function renderChips() {
+      document.querySelectorAll('#chipBox2 .chip').forEach(c => c.remove());
+      usernames.forEach((u, i) => {
+        const chip = document.createElement('span'); chip.className = 'chip';
+        chip.innerHTML = `@${esc(u)} <button data-i="${i}">&times;</button>`;
+        chip.querySelector('button').onclick = () => { usernames.splice(i, 1); renderChips(); };
+        input.before(chip);
+      });
+    }
+    const commitChip = wireChipInput(input, usernames, renderChips);
+    document.getElementById('btnSubmitAddMem').onclick = async () => {
+      commitChip();
+      if (!usernames.length) { showSheetErr('addMemErr', 'Add at least one username.'); return; }
+      try {
+        const r = await api(`/groups/${S.activeHouse.id}/members`, { method: 'POST', body: JSON.stringify({ usernames }) });
+        closeSheet();
+        toast('Housemates added', 'ok');
+        if (r.not_found_usernames?.length) toast(`Not found: ${r.not_found_usernames.join(', ')}`, 'err');
+        S.activeHouse = (await api(`/groups/${S.activeHouse.id}`)).group;
+        renderRouteBody();
+      } catch (e) { showSheetErr('addMemErr', e.message); }
+    };
+  });
+}
+
+// ---------------------------------------------------------------- SPLIT DETAIL / ACCEPT / REJECT
+function openSplitDetailSheet(e) {
+  const mine = (e.participants || []).find(p => p.user_id === S.user.id);
+  const isPayer = e.paid_by === S.user.id;
+  openSheet(`
+    <div class="sheet-grip"></div>
+    <div class="sheet-header"><h3>Split details</h3><button class="sheet-close" onclick="closeSheet()"><svg class="icon icon-sm"><use href="#ic-x"/></svg></button></div>
+    <div class="split-detail-amount">
+      <div class="amt">${money(e.amount)}</div>
+      <div class="desc">${esc(e.description)} · paid by ${esc(e.payer.name)}</div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      ${e.participants.map(p => `
+        <div class="list-row">
+          ${avatarHtml(p.user)}
+          <div class="row-main"><div class="row-title">${esc(p.user.name)}</div></div>
+          <div class="row-amt">${money(p.share_amount)}</div>
+          <span class="pill pill-${p.status}" style="margin-left:6px">${p.status}</span>
+        </div>`).join('')}
+    </div>
+    <div id="splitActionArea"></div>
+  `, () => {
+    const area = document.getElementById('splitActionArea');
+    if (mine && mine.status === 'pending' && !isPayer) {
+      area.innerHTML = `<div class="action-row">
+        <button class="btn btn-danger-outline" id="btnRejectSplit">Reject</button>
+        <button class="btn btn-primary" id="btnAcceptSplit">Accept</button>
+      </div>`;
+      document.getElementById('btnAcceptSplit').onclick = () => respondSplit(e.id, 'accept');
+      document.getElementById('btnRejectSplit').onclick = () => respondSplit(e.id, 'reject');
+    } else if (mine && mine.status === 'accepted' && !isPayer) {
+      area.innerHTML = `<button class="btn btn-primary" id="btnPayFromSplit"><svg class="icon icon-sm"><use href="#ic-pay"/></svg>Pay ${money(mine.share_amount)}</button>`;
+      document.getElementById('btnPayFromSplit').onclick = () => { closeSheet(); openPaySheet(e.paid_by, mine.share_amount, e.payer.name); };
+    }
+  });
+}
+async function respondSplit(id, action) {
+  try {
+    await api(`/expenses/${id}/respond`, { method: 'POST', body: JSON.stringify({ action }) });
+    closeSheet();
+    toast(action === 'accept' ? 'Split accepted' : 'Split rejected', 'ok');
+    await refreshCurrentRoute();
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+// ---------------------------------------------------------------- CREATE SPLIT
+function openCreateSplitSheet() {
+  let houses = S.houses;
+  let friends = S.friends;
+  const dataReady = houses.length > 0 || friends.length > 0 || S._housesEverLoaded || S._friendsEverLoaded;
+
+  let splitMethod = 'equal';
+  // Default to the house currently being viewed, if any; otherwise let the
+  // user pick explicitly rather than guessing.
+  let selectedHouseId = (S.route === 'house-detail' && S.activeHouse) ? S.activeHouse.id : '';
+  let candidates = () => {
+    const h = houses.find(x => x.id == selectedHouseId);
+    return (h && h.users) ? h.users : [S.user, ...friends];
+  };
+  let selected = new Set([S.user.id]);
+  let customShares = {};
+  let percentShares = {};
+
+  // Opens instantly either way -- amount/description never wait on
+  // network. The picker fields render immediately if houses/friends are
+  // already cached (the common case, kept warm in the background -- see
+  // warmHouseAndFriendCaches), or show a brief loading state on a genuine
+  // cold start instead of leaving the whole sheet feeling frozen.
+  openSheet(`
+    <div class="sheet-grip"></div>
+    <div class="sheet-header"><h3>New split</h3><button class="sheet-close" onclick="closeSheet()"><svg class="icon icon-sm"><use href="#ic-x"/></svg></button></div>
+    <input id="csAmount" class="big-amount-input" type="number" inputmode="decimal" placeholder="₹0.00" />
+    <label class="field-label">Description</label>
+    <input id="csDesc" placeholder="e.g. Groceries, Electricity bill" />
+    <div id="csPickers">${dataReady ? '' : '<div class="center-msg" style="padding:30px 0"><div class="spinner"></div></div>'}</div>
+    <div id="csErr" class="field-err hidden"></div>
+    <div style="margin-top:18px"><button class="btn btn-primary" id="btnSubmitSplit" ${dataReady ? '' : 'disabled'}>Create split</button></div>
+  `, async () => {
+    if (!dataReady) {
+      const [housesRes, friendsRes] = await Promise.all([api('/groups'), api('/friends')]);
+      houses = housesRes.groups; S.houses = houses; S._housesEverLoaded = true;
+      friends = friendsRes.friends; S.friends = friends; S._friendsEverLoaded = true;
+      if (!document.getElementById('csPickers')) return; // sheet was closed while loading
+    }
+    mountPickers();
+  });
+
+  function mountPickers() {
+    document.getElementById('csPickers').innerHTML = `
+      <label class="field-label">House (optional)</label>
+      <select id="csHouse">
+        <option value="" ${!selectedHouseId ? 'selected' : ''}>No house — just friends</option>
+        ${houses.map(h => `<option value="${h.id}" ${String(h.id) === String(selectedHouseId) ? 'selected' : ''}>${esc(h.name)}</option>`).join('')}
+      </select>
+      <label class="field-label">Paid by</label>
+      <select id="csPaidBy"></select>
+      <label class="field-label">Split type</label>
+      <div class="seg" id="csSeg">
+        <button data-m="equal" class="active">Equal</button>
+        <button data-m="percentage">Percentage</button>
+        <button data-m="custom">Custom</button>
+      </div>
+      <label class="field-label">Participants</label>
+      <div class="card" id="csParticipants"></div>`;
+    document.getElementById('btnSubmitSplit').disabled = false;
+
+    const paidBySel = document.getElementById('csPaidBy');
+    function renderPaidBy() {
+      const list = candidates();
+      paidBySel.innerHTML = list.map(u => `<option value="${u.id}" ${u.id === S.user.id ? 'selected' : ''}>${u.id === S.user.id ? 'You' : esc(u.name)}</option>`).join('');
+    }
+    function renderParticipants() {
+      const list = candidates();
+      const box = document.getElementById('csParticipants');
+      const amount = parseFloat(document.getElementById('csAmount').value) || 0;
+      const activeIds = list.filter(u => selected.has(u.id));
+      box.innerHTML = list.map(u => {
+        const on = selected.has(u.id);
+        let rightHtml = '';
+        if (on && splitMethod === 'equal') {
+          const share = activeIds.length ? amount / activeIds.length : 0;
+          rightHtml = `<div class="row-amt">${money(share)}</div>`;
+        } else if (on && splitMethod === 'percentage') {
+          rightHtml = `<input type="number" data-pct="${u.id}" value="${percentShares[u.id] ?? ''}" placeholder="%" style="width:70px;text-align:right;padding:8px" />`;
+        } else if (on && splitMethod === 'custom') {
+          rightHtml = `<input type="number" data-cust="${u.id}" value="${customShares[u.id] ?? ''}" placeholder="₹" style="width:80px;text-align:right;padding:8px" />`;
+        }
+        return `
+        <div class="participant-row" style="padding:10px 14px">
+          <div class="check-toggle ${on ? 'on' : ''}" data-toggle="${u.id}"><svg class="icon icon-sm"><use href="#ic-check"/></svg></div>
+          ${avatarHtml(u, 'sm')}
+          <div class="row-main" style="margin-left:2px">${u.id === S.user.id ? 'You' : esc(u.name)}</div>
+          ${rightHtml}
+        </div>`;
+      }).join('');
+      box.querySelectorAll('[data-toggle]').forEach(t => t.onclick = () => {
+        const id = Number(t.dataset.toggle);
+        if (selected.has(id)) selected.delete(id); else selected.add(id);
+        renderParticipants();
+      });
+      box.querySelectorAll('[data-pct]').forEach(inp => inp.oninput = () => { percentShares[inp.dataset.pct] = inp.value; });
+      box.querySelectorAll('[data-cust]').forEach(inp => inp.oninput = () => { customShares[inp.dataset.cust] = inp.value; });
+    }
+    document.getElementById('csHouse').onchange = (e) => {
+      selectedHouseId = e.target.value;
+      selected = new Set(candidates().map(u => u.id));
+      renderPaidBy(); renderParticipants();
+    };
+    document.getElementById('csAmount').oninput = renderParticipants;
+    document.querySelectorAll('#csSeg button').forEach(b => b.onclick = () => {
+      document.querySelectorAll('#csSeg button').forEach(x => x.classList.remove('active'));
+      b.classList.add('active'); splitMethod = b.dataset.m; renderParticipants();
+    });
+
+    selected = new Set(candidates().map(u => u.id));
+    renderPaidBy(); renderParticipants();
+
+    document.getElementById('btnSubmitSplit').onclick = async () => {
+      const amount = parseFloat(document.getElementById('csAmount').value);
+      const description = document.getElementById('csDesc').value.trim();
+      const paid_by = Number(paidBySel.value);
+      const group_id = selectedHouseId ? Number(selectedHouseId) : null;
+      const ids = Array.from(selected);
+      if (!amount || amount <= 0) return showSheetErr('csErr', 'Enter a valid amount.');
+      if (!description) return showSheetErr('csErr', 'Add a description.');
+      if (!ids.length) return showSheetErr('csErr', 'Pick at least one participant.');
+
+      let participants;
+      if (splitMethod === 'equal') {
+        participants = ids.map(id => ({ user_id: id }));
+      } else if (splitMethod === 'percentage') {
+        const total = ids.reduce((s, id) => s + (parseFloat(percentShares[id]) || 0), 0);
+        if (Math.abs(total - 100) > 0.01) return showSheetErr('csErr', `Percentages must total 100 (currently ${total}).`);
+        participants = ids.map(id => ({ user_id: id, percentage: parseFloat(percentShares[id]) || 0 }));
+      } else {
+        const total = ids.reduce((s, id) => s + (parseFloat(customShares[id]) || 0), 0);
+        if (Math.abs(total - amount) > 0.01) return showSheetErr('csErr', `Shares (${money(total)}) must total ${money(amount)}.`);
+        participants = ids.map(id => ({ user_id: id, share_amount: parseFloat(customShares[id]) || 0 }));
+      }
+
+      try {
+        await api('/expenses', { method: 'POST', body: JSON.stringify({
+          group_id, amount, description, split_method: splitMethod, paid_by, participants,
+        })});
+        closeSheet();
+        toast('Split created — housemates notified', 'ok');
+        await refreshCurrentRoute();
+      } catch (e) { showSheetErr('csErr', e.message); }
+    };
+  }
+}
+
+// ---------------------------------------------------------------- FRIENDS
+function friendsView() {
+  return `
+    <div class="action-row" style="margin-bottom:16px">
+      <button class="btn btn-primary" id="btnAddFriend">+ Add friend</button>
+    </div>
+    ${S.friendRequests?.length ? `
+      <div class="section-head"><h3>Requests</h3></div>
+      <div class="card">${S.friendRequests.map(fr => `
+        <div class="list-row">
+          ${avatarHtml(fr.user)}
+          <div class="row-main"><div class="row-title">${esc(fr.user.name)}</div><div class="row-sub">@${esc(fr.user.username)}</div></div>
+          <button class="btn btn-primary btn-sm" data-fr-accept="${fr.id}">Accept</button>
+        </div>`).join('')}</div>` : ''}
+    <div class="section-head"><h3>Your friends</h3></div>
+    <div class="card">
+      ${S.friends.length ? S.friends.map(f => `
+        <div class="list-row pressable" data-friend="${f.id}">
+          ${avatarHtml(f)}
+          <div class="row-main"><div class="row-title">${esc(f.name)}</div><div class="row-sub">@${esc(f.username)}</div></div>
+          ${friendBalanceHtml(f)}
+        </div>`).join('') : `<div class="empty-state">No friends added yet.</div>`}
+    </div>`;
+}
+function friendBalanceHtml(f) {
+  const balance = parseFloat(f.balance || 0);
+
+  if (Math.abs(balance) < 0.005) {
+    return `<span class="pill" style="background:var(--surface-2);color:var(--text-muted)">Settled</span>`;
+  }
+
+  if (balance > 0) {
+    return `<div class="row-amt pos">${money(balance)}</div>`;
+  }
+
+  return `
+    <div class="row-amt neg">${money(Math.abs(balance))}</div>
+    <button class="btn btn-primary btn-sm" data-pay-user="${f.id}" data-pay-amt="${Math.abs(balance)}" data-pay-name="${esc(f.name)}">Pay</button>`;
+}
+function mountFriends() {
+  document.getElementById('btnAddFriend').onclick = openAddFriendSheet;
+  document.querySelectorAll('[data-fr-accept]').forEach(btn => btn.onclick = async () => {
+    try {
+      await api(`/friends/${btn.dataset.frAccept}/respond`, { method: 'POST', body: JSON.stringify({ action: 'accept' }) });
+      toast('Friend added', 'ok');
+      await refreshCurrentRoute();
+      refreshBadges();
+    } catch (e) { toast(e.message, 'err'); }
+  });
+  document.querySelectorAll('[data-pay-user]').forEach(btn => {
+    btn.onclick = (ev) => { ev.stopPropagation(); openPaySheet(btn.dataset.payUser, btn.dataset.payAmt, btn.dataset.payName); };
+  });
+  document.querySelectorAll('[data-friend]').forEach(row => row.onclick = () => openFriendLedgerSheet(row.dataset.friend));
+}
+function openAddFriendSheet() {
+  openSheet(`
+    <div class="sheet-grip"></div>
+    <div class="sheet-header"><h3>Add a friend</h3><button class="sheet-close" onclick="closeSheet()"><svg class="icon icon-sm"><use href="#ic-x"/></svg></button></div>
+    <label class="field-label">Username</label>
+    <input id="afUsername" placeholder="their_username" />
+    <div id="afErr" class="field-err hidden"></div>
+    <div style="margin-top:18px"><button class="btn btn-primary" id="btnSendReq">Send request</button></div>
+  `, () => {
+    document.getElementById('btnSendReq').onclick = async () => {
+      const username = document.getElementById('afUsername').value.trim().replace(/^@/, '');
+      if (!username) return showSheetErr('afErr', 'Enter a username.');
+      try {
+        const found = await api('/search?q=' + encodeURIComponent(username));
+        const match = found.people.find(p => p.username === username);
+        if (!match) return showSheetErr('afErr', 'No user with that username.');
+        await api('/friends/request', { method: 'POST', body: JSON.stringify({ friend_id: match.id }) });
+        closeSheet(); toast('Friend request sent', 'ok');
+      } catch (e) { showSheetErr('afErr', e.message); }
+    };
+  });
+}
+async function openFriendLedgerSheet(userId) {
+  openSheet(`<div class="sheet-grip"></div><div class="center-msg"><div class="spinner"></div></div>`);
+  try {
+    const l = await api(`/friends/${userId}/ledger`);
+    const netMine = parseFloat(l.net_balance);
+    openSheet(`
+      <div class="sheet-grip"></div>
+      <div class="sheet-header"><h3>${esc(l.friend.name)}</h3><button class="sheet-close" onclick="closeSheet()"><svg class="icon icon-sm"><use href="#ic-x"/></svg></button></div>
+      <div style="text-align:center;padding:6px 0 18px">
+        <div style="font-size:32px;font-weight:800;color:${netMine > 0 ? 'var(--green)' : netMine < 0 ? 'var(--red)' : 'var(--text)'}">${money(Math.abs(netMine))}</div>
+        <div style="color:var(--text-muted);font-size:13.5px;margin-top:4px">${netMine > 0 ? `${esc(l.friend.name)} owes you` : netMine < 0 ? `You owe ${esc(l.friend.name)}` : 'All settled up'}</div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Paid by you</div><div class="stat-value" style="font-size:17px">${money(l.total_paid_by_me)}</div></div>
+        <div class="stat-card"><div class="stat-label">Paid by them</div><div class="stat-value" style="font-size:17px">${money(l.total_paid_by_them)}</div></div>
+      </div>
+      ${netMine < 0 ? `<button class="btn btn-primary" id="btnPayFriend"><svg class="icon icon-sm"><use href="#ic-pay"/></svg>Pay ${money(Math.abs(netMine))}</button>` : ''}
+    `, () => {
+      document.getElementById('btnPayFriend')?.addEventListener('click', () => { closeSheet(); openPaySheet(l.friend.id, Math.abs(netMine), l.friend.name); });
+    });
+  } catch (e) { closeSheet(); toast(e.message, 'err'); }
+}
+
+// ---------------------------------------------------------------- PROFILE
+function profileView() {
+  const pushOn = localStorage.getItem('es_push_enabled') === '1';
+  return `
+    <div class="profile-header">${avatarHtml(S.user)}<h2>${esc(S.user.name)}</h2><div class="sub">@${esc(S.user.username)}</div></div>
+    <div class="card" style="margin-top:10px">
+      <div class="settings-row">
+        <div><div class="label">Push notifications</div><div class="desc">Get notified about splits & payments</div></div>
+        <button class="switch ${pushOn ? 'on' : ''}" id="togglePush"><span class="knob"></span></button>
+      </div>
+      <div class="settings-row">
+        <div><div class="label">UPI ID</div><div class="desc">${S.user.upi_id ? esc(S.user.upi_id) : 'Not set — add one so housemates can pay you'}</div></div>
+        <a class="link" id="btnEditUpi" style="color:var(--primary);font-weight:700;font-size:13px">Edit</a>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <button class="list-row pressable" style="width:100%;border:none;background:none;text-align:left" id="btnLogout">
+        <svg class="icon" style="color:var(--red)"><use href="#ic-logout"/></svg>
+        <div class="row-main" style="color:var(--red);font-weight:700">Log out</div>
+      </button>
+    </div>
+    <div style="text-align:center;color:var(--text-muted);font-size:12px;margin-top:18px">Easesplit · installable web app</div>
+  `;
+}
+function mountProfile() {
+  document.getElementById('btnLogout').onclick = () => logout();
+  document.getElementById('togglePush').onclick = togglePush;
+  document.getElementById('btnEditUpi').onclick = () => {
+    openSheet(`
+      <div class="sheet-grip"></div>
+      <div class="sheet-header"><h3>Your UPI ID</h3><button class="sheet-close" onclick="closeSheet()"><svg class="icon icon-sm"><use href="#ic-x"/></svg></button></div>
+      <input id="upiInput" placeholder="yourname@upi" value="${esc(S.user.upi_id || '')}" />
+      <div class="field-hint">This is what housemates' "Pay" buttons will send money to. Get it exactly right -- it's not verified against a bank.</div>
+      <div id="upiErr" class="field-err hidden"></div>
+      <div style="margin-top:18px"><button class="btn btn-primary" id="btnSaveUpi">Save</button></div>
+    `, () => {
+      document.getElementById('btnSaveUpi').onclick = async () => {
+        const upi_id = document.getElementById('upiInput').value.trim();
+        try {
+          const r = await api('/profile', { method: 'PUT', body: JSON.stringify({ upi_id: upi_id || null }) });
+          S.user.upi_id = r.user.upi_id;
+          saveSession();
+          closeSheet();
+          toast('UPI ID saved', 'ok');
+          renderRouteBody();
+        } catch (e) { showSheetErr('upiErr', e.message); }
+      };
+    });
+  };
+}
+
+// ---------------------------------------------------------------- NOTIFICATIONS
+async function openNotificationsSheet() {
+  openSheet(`<div class="sheet-grip"></div><div class="center-msg"><div class="spinner"></div></div>`);
+  try {
+    const r = await api('/notifications');
+    openSheet(`
+      <div class="sheet-grip"></div>
+      <div class="sheet-header"><h3>Notifications</h3><button class="sheet-close" onclick="closeSheet()"><svg class="icon icon-sm"><use href="#ic-x"/></svg></button></div>
+      <div class="card">
+        ${r.notifications.data.length ? r.notifications.data.map(n => `
+          <div class="list-row">
+            <svg class="icon icon-sm" style="color:${n.read_at ? 'var(--text-muted)' : 'var(--primary)'}"><use href="#ic-bell"/></svg>
+            <div class="row-main"><div class="row-title">${esc(n.data.title)}</div><div class="row-sub">${esc(n.data.body || '')} · ${timeAgo(n.created_at)}</div></div>
+          </div>`).join('') : `<div class="empty-state">You're all caught up.</div>`}
+      </div>
+    `);
+    if (r.unread_count) { await api('/notifications/read-all', { method: 'POST' }); document.getElementById('bellDot')?.classList.add('hidden'); }
+  } catch (e) { closeSheet(); toast(e.message, 'err'); }
+}
+
+// ---------------------------------------------------------------- PUSH NOTIFICATIONS
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw = atob(base64);
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+}
+async function togglePush() {
+  const btn = document.getElementById('togglePush');
+  const enabling = !btn.classList.contains('on');
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    toast('Push notifications aren’t supported on this browser.', 'err'); return;
+  }
+  if (enabling) {
+    try {
+      const perm = await Notification.requestPermission();
+      if (perm !== 'granted') { toast('Notification permission denied.', 'err'); return; }
+      const reg = await navigator.serviceWorker.ready;
+      if (!S.vapidKey) S.vapidKey = (await api('/push/vapid-public-key')).key;
+      let sub = await reg.pushManager.getSubscription();
+      if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(S.vapidKey) });
+      await api('/push-subscriptions', { method: 'POST', body: JSON.stringify(sub.toJSON()) });
+      localStorage.setItem('es_push_enabled', '1');
+      btn.classList.add('on');
+      toast('Push notifications enabled', 'ok');
+    } catch (e) { toast('Could not enable push: ' + e.message, 'err'); }
+  } else {
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.getSubscription();
+      if (sub) { await api('/push-subscriptions', { method: 'DELETE', body: JSON.stringify({ endpoint: sub.endpoint }) }); await sub.unsubscribe(); }
+      localStorage.removeItem('es_push_enabled');
+      btn.classList.remove('on');
+      toast('Push notifications disabled');
+    } catch (e) { toast(e.message, 'err'); }
+  }
+}
+
+// ---------------------------------------------------------------- PWA UPDATES
+// Standard "new version ready" flow: the service worker is network-first
+// for app.html (see sw.js), so a fresh open already gets the latest code --
+// this banner is for someone who has the app open right now while a new
+// version gets deployed, so they're not silently stuck on stale JS.
+let waitingWorker = null;
+function showUpdateBanner() {
+  if (document.getElementById('updateBanner')) return;
+  const bar = document.createElement('div');
+  bar.id = 'updateBanner';
+  bar.className = 'update-banner';
+  bar.innerHTML = `<span>A new version of Easesplit is ready.</span><button id="btnUpdateReload">Refresh</button>`;
+  document.body.appendChild(bar);
+  document.getElementById('btnUpdateReload').onclick = () => waitingWorker?.postMessage('SKIP_WAITING');
+}
+function setupServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+
+  navigator.serviceWorker.register('/sw.js').then((reg) => {
+    if (reg.waiting && navigator.serviceWorker.controller) {
+      waitingWorker = reg.waiting;
+      showUpdateBanner();
+    }
+    reg.addEventListener('updatefound', () => {
+      const installing = reg.installing;
+      installing?.addEventListener('statechange', () => {
+        if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+          waitingWorker = installing;
+          showUpdateBanner();
+        }
+      });
+    });
+    // Re-check for a new deploy whenever the app regains focus, not just on cold start.
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') reg.update().catch(() => {});
+    });
+  }).catch(() => {});
+
+  let reloadedForUpdate = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloadedForUpdate) return;
+    reloadedForUpdate = true;
+    window.location.reload();
+  });
+}
+
+// ---------------------------------------------------------------- BOOT
+(async function init() {
+  setupServiceWorker();
+  if (S.token) {
+    try { await api('/auth/me'); } catch (e) { S.token = null; S.user = null; saveSession(); }
+  }
+  renderRoot();
+})();
+</script>
+</body>
+</html>
